@@ -9,7 +9,7 @@ const generateJWT = (id, email) => {
 
 class UserController {
   async registration(req, res) {
-    const { email, password, username } = req.body;
+    const { email, password, username, favoriteGames } = req.body;
     const candidate = await prisma.user.findUnique({
       where: {
         email: email,
@@ -18,18 +18,25 @@ class UserController {
     if (candidate) {
       res.json({ message: "Пользователь с таким E-mail уже существует" });
     } else {
+      const hashPassword = await bcrypt.hash(password, 6);
+      const user = await prisma.user.create({
+        data: {
+          username: username,
+          email: email,
+          password: hashPassword,
+        },
+      });
+      for (let i = 0; i < favoriteGames.length; i++) {
+        await prisma.favoriteGame.create({
+          data: {
+            userId: user.id,
+            name: favoriteGames[i]["name"],
+          },
+        });
+      }
+      const token = generateJWT(user.id, user.email);
+      res.json(token);
     }
-    const hashPassword = await bcrypt.hash(password, 6);
-    const user = await prisma.user.create({
-      data: {
-        username: username,
-        email: email,
-        password: hashPassword,
-      },
-    });
-    const token = generateJWT(user.id, user.email);
-
-    res.json(token);
   }
 
   async login(req, res) {
@@ -41,16 +48,16 @@ class UserController {
       },
     });
 
-    if (user){
-        const comparePassword = bcrypt.compareSync(password, user.password);
-        if(comparePassword){
-            const token = generateJWT(user.id, user.email);
-            res.json(token)
-        } else{
-            res.json({message: 'Неверный пароль'})
-        }
-    } else{
-        res.json({message: "Пользователя с таким E-mail не существует"})
+    if (user) {
+      const comparePassword = bcrypt.compareSync(password, user.password);
+      if (comparePassword) {
+        const token = generateJWT(user.id, user.email);
+        res.json(token);
+      } else {
+        res.json({ message: "Неверный пароль" });
+      }
+    } else {
+      res.json({ message: "Пользователя с таким E-mail не существует" });
     }
   }
 }
