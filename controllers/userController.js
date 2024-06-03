@@ -3,20 +3,22 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const prisma = new PrismaClient();
 
-const generateJWT = (id, email) => {
-  return jwt.sign({ id, email }, process.env.SECRET_KEY, { expiresIn: "24h" });
+const generateJWT = (id) => {
+  return jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "24h" });
 };
 
 class UserController {
   async registration(req, res) {
-    const { email, password, username, favoriteGames } = req.body;
+    const { email, password, username, favoriteGames, role, avatar } = req.body;
     const candidate = await prisma.user.findUnique({
       where: {
         email: email,
       },
     });
     if (candidate) {
-      res.json({ message: "Пользователь с таким E-mail уже существует" });
+      return res.json({
+        message: "Пользователь с таким E-mail уже существует",
+      });
     } else {
       const hashPassword = await bcrypt.hash(password, 6);
       const user = await prisma.user.create({
@@ -24,6 +26,8 @@ class UserController {
           username: username,
           email: email,
           password: hashPassword,
+          role: role,
+          avatar: avatar
         },
       });
       for (let i = 0; i < favoriteGames.length; i++) {
@@ -35,7 +39,10 @@ class UserController {
         });
       }
       const token = generateJWT(user.id, user.email);
-      res.json(token);
+      res.cookie("jwt", token, {
+        httpOnly: true,
+      });
+      res.json({ message: "success" });
     }
   }
 
@@ -52,13 +59,44 @@ class UserController {
       const comparePassword = bcrypt.compareSync(password, user.password);
       if (comparePassword) {
         const token = generateJWT(user.id, user.email);
-        res.json(token);
+        res.cookie("jwt", token, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+        res.json({ message: "success" });
       } else {
-        res.json({ message: "Неверный пароль" });
+        return res.json({ message: "Неверный пароль" });
       }
     } else {
-      res.json({ message: "Пользователя с таким E-mail не существует" });
+      return res.json({ message: "Пользователя с таким E-mail не существует" });
     }
+  }
+
+  async verify(req, res) {
+    try {
+      const cookie = req.cookies["jwt"];
+
+      const claims = jwt.verify(cookie, process.env.SECRET_KEY);
+
+      if (!claims) {
+        return res.status(401).status({ message: "Неавторизирован" });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: claims.id },
+      });
+
+      res.send(user);
+    } catch (e) {
+      return res.status(401).status({ message: "Неавторизирован" });
+    }
+  }
+
+  async logout(req, res) {
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.send({
+      message: 'success',
+    });
   }
 }
 

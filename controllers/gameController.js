@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 class GameController {
   async create(req, res) {
-    const { name, developer, releaseDate, price, pic, description } = req.body;
+    const { name, developer, releaseDate, price, pic, description, cover } = req.body;
     const isExist = await prisma.game.findUnique({
       where: {
         name: name,
@@ -19,6 +19,7 @@ class GameController {
           releaseDate: releaseDate,
           price: price,
           description: description,
+          cover: cover,
         },
       });
       for (let i = 0; i < pic.length; i++) {
@@ -31,6 +32,19 @@ class GameController {
       }
       res.json(game);
     }
+  }
+
+  async get(req, res){
+    const { id } = req.body;
+
+    const game = prisma.game.findUnique({
+      where: {
+        id: id
+      }
+    })
+    
+    res.JSON(game)
+
   }
 }
 
