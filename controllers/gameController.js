@@ -33,7 +33,7 @@ class GameController {
           price: price,
           genre: genre,
           description: description,
-          cover: `http://localhost:5000/games/${name.replaceAll(' ', '')}/${fileName}`,
+          cover: `http://92.53.105.185:5000/games/${name.replaceAll(' ', '')}/${fileName}`,
         },
       });
       cover.mv(path.resolve(__dirname, "..", `games/${game.name.replaceAll(' ', '')}`, fileName));
@@ -49,7 +49,7 @@ class GameController {
           await prisma.picture.create({
             data: {
               gameId: game.id,
-              src: `http://localhost:5000/games/${game.name.replaceAll(' ', '')}/${fileName}`,
+              src: `http://92.53.105.185:5000/games/${game.name.replaceAll(' ', '')}/${fileName}`,
             },
           });
         }
