@@ -45,8 +45,10 @@ model Game {
   name         String?     @unique
   developer    String?
   releaseDate  String?
-  price        Int?        @default(0)
+  price        String?     @default("0")
   cover        String?
+  genre        String?
+  platform     String?
   pic          Picture[]
   description  String?
   reviews      Review[]

@@ -2,6 +2,8 @@ const express = require("express")
 const cors = require("cors")
 const router = require('./routes/index')
 const cookieParser = require("cookie-parser")
+const fileUpload = require('express-fileupload');
+const path = require('path')
 
 const PORT = process.env.PORT || 5000
 
@@ -11,6 +13,8 @@ app.use(cors({
     origin: ['http://localhost:3000']
 }))
 app.use(cookieParser())
+app.use(fileUpload())
+app.use(express.static(path.resolve(__dirname, 'static')))
 app.use(express.json())
 app.use('/api', router)
 
