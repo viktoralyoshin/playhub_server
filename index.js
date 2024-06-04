@@ -8,10 +8,7 @@ const path = require('path')
 const PORT = process.env.PORT || 5000
 
 const app = express()
-app.use(cors({
-    credentials: true,
-    origin: ['http://localhost:3000']
-}))
+app.use(cors())
 app.use(cookieParser())
 app.use(fileUpload())
 app.use(express.static(path.resolve(__dirname, 'games')))
