@@ -45,12 +45,13 @@ class UserController {
       });
 
       avatar.mv(path.resolve(__dirname, "..", `games/avatars`, fileName));
-
-      for (let i = 0; i < favoriteGames.length; i++) {
+      const favgames = favoriteGames.split(',');
+      for (let i = 0; i < favgames.length; i++) {
+        console.log(favgames[i])
         await prisma.favoriteGame.create({
           data: {
             userId: user.id,
-            name: favoriteGames[i]["name"],
+            name: favgames[i],
           },
         });
       }

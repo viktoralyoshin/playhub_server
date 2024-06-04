@@ -6,7 +6,7 @@ const fs = require("fs");
 
 class GameController {
   async create(req, res) {
-    const { name, developer, releaseDate, price, description, genre } =
+    const { name, developer, releaseDate, price, description, genreName } =
       req.body;
     const { cover } = req.files;
     const pic = req.files;
@@ -26,9 +26,9 @@ class GameController {
         console.log("Папка создана");
       });
 
-      const genre = await prisma.genre.findUnique({
+      const genre = await prisma.genre.findFirst({
         where: {
-          name: genre
+          name: genreName
         }
       })
 
