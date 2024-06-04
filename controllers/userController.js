@@ -69,9 +69,7 @@ class UserController {
   async verify(req, res) {
     try {
       const token = req.body.token;
-      console.log(token);
       const claims = jwt.verify(token, process.env.SECRET_KEY);
-      console.log(claims)
 
       if (!claims) {
         return res.status(401).send({ message: "Неавторизирован" });
@@ -81,9 +79,7 @@ class UserController {
         where: { id: claims.id },
       });
 
-      const tokenRefresh = generateJWT(user.id, user.email);
-
-      res.json({ user: user, token: tokenRefresh });
+      res.send({user, token});
     } catch (e) {
       return res.status(401).send({ message: "Неавторизирован" });
     }
