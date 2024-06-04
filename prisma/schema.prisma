@@ -49,7 +49,6 @@ model Game {
   price        String?     @default("0")
   cover        String?
   genre        String?
-  platform     String?
   pic          Picture[]
   description  String?
   reviews      Review[]

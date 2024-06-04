@@ -29,6 +29,7 @@ const calculateRating = async (gameId) => {
 class ReviewController {
   async create(req, res) {
     const { mark, title, text, gameId, userId } = req.body;
+    console.log(req.body)
     const isExist = await prisma.review.findFirst({
       where: {
         userId: userId,
@@ -50,9 +51,30 @@ class ReviewController {
 
       calculateRating(gameId);
 
-      res.json(review);
+      res.json({
+        "status": 200,
+        "message":"Отзыв добавлен"
+      });
     }
   }
+
+  async check (req, res) {
+    const {id} = req.body;
+
+    const review = await prisma.review.findFirst({
+      where: {
+        userId: id
+      }
+    })
+
+    if(review){
+      res.send({message: "true"})
+    } else{
+      res.send({message: "false"})
+    }
+
+  }
+
 }
 
 module.exports = new ReviewController();

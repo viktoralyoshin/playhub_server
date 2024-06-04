@@ -23,7 +23,7 @@ class GameController {
         if (err) {
           return console.error(err);
         }
-        console.log("Directory created successfully!");
+        console.log("Папка создана");
       });
       const game = await prisma.game.create({
         data: {
@@ -33,7 +33,7 @@ class GameController {
           price: price,
           genre: genre,
           description: description,
-          cover: `http://92.53.105.185:5000/games/${name.replaceAll(' ', '')}/${fileName}`,
+          cover: `http://localhost:5000/${name.replaceAll(' ', '')}/${fileName}`,
         },
       });
       cover.mv(path.resolve(__dirname, "..", `games/${game.name.replaceAll(' ', '')}`, fileName));
@@ -49,7 +49,7 @@ class GameController {
           await prisma.picture.create({
             data: {
               gameId: game.id,
-              src: `http://92.53.105.185:5000/games/${game.name.replaceAll(' ', '')}/${fileName}`,
+              src: `http://localhost:5000/${game.name.replaceAll(' ', '')}/${fileName}`,
             },
           });
         }
@@ -69,13 +69,31 @@ class GameController {
   async get(req, res) {
     const { id } = req.body;
 
-    const game = prisma.game.findUnique({
+    const game = await prisma.game.findUnique({
       where: {
         id: id,
       },
     });
 
-    res.JSON(game);
+    const reviews = await prisma.review.findMany({
+      where: {
+        gameId: id
+      }
+    })
+
+    const images = await prisma.picture.findMany({
+      where: {
+        gameId: id
+      }
+    })
+
+    res.json({game: game, reviews: reviews, images: images});
+  }
+
+  async getAll(req, res){
+    const games = await prisma.game.findMany();
+
+    res.json(games)
   }
 }
 

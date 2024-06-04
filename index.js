@@ -14,7 +14,7 @@ app.use(cors({
 }))
 app.use(cookieParser())
 app.use(fileUpload())
-app.use(express.static(path.resolve(__dirname, 'static')))
+app.use(express.static(path.resolve(__dirname, 'games')))
 app.use(express.json())
 app.use('/api', router)
 

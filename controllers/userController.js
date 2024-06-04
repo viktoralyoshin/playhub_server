@@ -79,7 +79,7 @@ class UserController {
       const claims = jwt.verify(cookie, process.env.SECRET_KEY);
 
       if (!claims) {
-        return res.status(401).status({ message: "Неавторизирован" });
+        return res.status(401).send({ message: "Неавторизирован" });
       }
 
       const user = await prisma.user.findUnique({
@@ -88,7 +88,7 @@ class UserController {
 
       res.send(user);
     } catch (e) {
-      return res.status(401).status({ message: "Неавторизирован" });
+      return res.status(401).send({ message: "Неавторизирован" });
     }
   }
 
@@ -97,6 +97,17 @@ class UserController {
     res.send({
       message: 'success',
     });
+  }
+
+  async getUser(req, res){
+    const {id} = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id
+      }
+    })
+    res.json(user)
   }
 }
 

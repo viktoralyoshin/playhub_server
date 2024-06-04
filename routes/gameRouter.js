@@ -3,6 +3,7 @@ const router = new Router()
 const gameController = require('../controllers/gameController.js')
 
 router.post('/create', gameController.create)
-router.get('/get', gameController.get)
+router.post('/get', gameController.get)
+router.get('/getall', gameController.getAll)
 
 module.exports = router
