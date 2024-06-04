@@ -75,8 +75,9 @@ class UserController {
   async verify(req, res) {
     try {
       const cookie = req.cookies["jwt"];
-
+      console.log(req.cookies)
       const claims = jwt.verify(cookie, process.env.SECRET_KEY);
+
 
       if (!claims) {
         return res.status(401).send({ message: "Неавторизирован" });
