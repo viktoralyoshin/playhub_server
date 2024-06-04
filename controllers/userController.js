@@ -27,7 +27,7 @@ class UserController {
           email: email,
           password: hashPassword,
           role: role,
-          avatar: avatar
+          avatar: avatar,
         },
       });
       for (let i = 0; i < favoriteGames.length; i++) {
@@ -39,10 +39,8 @@ class UserController {
         });
       }
       const token = generateJWT(user.id, user.email);
-      res.cookie("jwt", token, {
-        httpOnly: true,
-      });
-      res.json({ message: "success" });
+
+      res.json({ message: "success", token: token });
     }
   }
 
@@ -59,12 +57,7 @@ class UserController {
       const comparePassword = bcrypt.compareSync(password, user.password);
       if (comparePassword) {
         const token = generateJWT(user.id, user.email);
-        res.cookie("jwt", token, {
-          httpOnly: true,
-          secure: false,
-          maxAge: 24 * 60 * 60 * 1000,
-        });
-        res.json({ message: "success" });
+        res.json({ message: "success", token: token });
       } else {
         return res.json({ message: "Неверный пароль" });
       }
@@ -75,10 +68,10 @@ class UserController {
 
   async verify(req, res) {
     try {
-      const cookie = req.cookies["jwt"];
-      console.log(req.cookies)
-      const claims = jwt.verify(cookie, process.env.SECRET_KEY);
-
+      const token = req.body.token;
+      console.log(token);
+      const claims = jwt.verify(token, process.env.SECRET_KEY);
+      console.log(claims)
 
       if (!claims) {
         return res.status(401).send({ message: "Неавторизирован" });
@@ -88,28 +81,27 @@ class UserController {
         where: { id: claims.id },
       });
 
-      res.send(user);
+      const tokenRefresh = generateJWT(user.id, user.email);
+
+      res.json({ user: user, token: tokenRefresh });
     } catch (e) {
       return res.status(401).send({ message: "Неавторизирован" });
     }
   }
 
   async logout(req, res) {
-    res.cookie("jwt", "", { maxAge: 0 });
-    res.send({
-      message: 'success',
-    });
+    res.json({ message: "success", token: "" });
   }
 
-  async getUser(req, res){
-    const {id} = req.body;
+  async getUser(req, res) {
+    const { id } = req.body;
 
     const user = await prisma.user.findUnique({
       where: {
-        id: id
-      }
-    })
-    res.json(user)
+        id: id,
+      },
+    });
+    res.json(user);
   }
 }
 
