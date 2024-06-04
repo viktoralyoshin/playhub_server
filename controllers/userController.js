@@ -61,7 +61,7 @@ class UserController {
         const token = generateJWT(user.id, user.email);
         res.cookie("jwt", token, {
           httpOnly: true,
-          sameSite: "None",
+          secure: false,
           maxAge: 24 * 60 * 60 * 1000,
         });
         res.json({ message: "success" });
@@ -75,7 +75,7 @@ class UserController {
 
   async verify(req, res) {
     try {
-      const cookie = req.cookies.jwt;
+      const cookie = req.cookies["jwt"];
       console.log(req.cookies)
       const claims = jwt.verify(cookie, process.env.SECRET_KEY);
 
