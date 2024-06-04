@@ -40,7 +40,7 @@ class UserController {
           email: email,
           password: hashPassword,
           role: role,
-          avatar: `http://localhost:5000/avatars/${fileName}`,
+          avatar: `http://92.53.105.185:5000/avatars/${fileName}`,
         },
       });
 

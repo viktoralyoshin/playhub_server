@@ -18,24 +18,25 @@ class collectionController {
           description: description,
         },
       });
-      for (let item in games){
-        const game = await prisma.game.findUnique({
-            where: {
-                name: item
-            }
-        })
+      for (let i = 0; i < games.length; i++) {
+        console.log();
+        const game = await prisma.game.findFirst({
+          where: {
+            name: games[i],
+          },
+        });
         const update = await prisma.game.update({
-            where:{
-                id: game.id,
-            },
-            data: {
-                collectionId: collection.id
-            }
-        })
+          where: {
+            id: game.id,
+          },
+          data: {
+            collectionId: collection.id,
+          },
+        });
       }
       res.json({
         status: 200,
-        message: "Статья добавлена добавлен",
+        message: "Подборка добавлена",
       });
     }
   }
@@ -44,6 +45,16 @@ class collectionController {
     const collections = await prisma.collection.findMany();
 
     res.json(collections);
+  }
+
+  async getGames(req, res) {
+    const { id } = req.body;
+    const games = await prisma.game.findMany({
+      where: {
+        collectionId: id
+      },
+    });
+    res.json(games)
   }
 }
 
