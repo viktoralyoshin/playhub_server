@@ -2,6 +2,9 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const prisma = new PrismaClient();
+const path = require("path");
+const fs = require("fs");
+const uuid = require("uuid");
 
 const generateJWT = (id) => {
   return jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "24h" });
@@ -9,7 +12,8 @@ const generateJWT = (id) => {
 
 class UserController {
   async registration(req, res) {
-    const { email, password, username, favoriteGames, role, avatar } = req.body;
+    const { email, password, username, favoriteGames, role } = req.body;
+    const { avatar } = req.files;
     const candidate = await prisma.user.findUnique({
       where: {
         email: email,
@@ -20,6 +24,15 @@ class UserController {
         message: "Пользователь с таким E-mail уже существует",
       });
     } else {
+
+      let fileName = uuid.v4() + "." + avatar.name.split(".").reverse()[0];
+      fs.mkdir(path.join(__dirname, "..", `games/avatars/`), (err) => {
+        if (err) {
+          return console.error(err);
+        }
+        console.log("Папка создана");
+      });
+
       const hashPassword = await bcrypt.hash(password, 6);
       const user = await prisma.user.create({
         data: {
@@ -27,9 +40,12 @@ class UserController {
           email: email,
           password: hashPassword,
           role: role,
-          avatar: avatar,
+          avatar: `http://localhost:5000/avatars/${fileName}`,
         },
       });
+
+      avatar.mv(path.resolve(__dirname, "..", `games/avatars`, fileName));
+
       for (let i = 0; i < favoriteGames.length; i++) {
         await prisma.favoriteGame.create({
           data: {

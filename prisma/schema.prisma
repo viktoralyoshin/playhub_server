@@ -9,8 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
@@ -25,6 +25,7 @@ model User {
   avatar        String?
   favoriteGames FavoriteGame[]
   Review        Review[]
+  articles      Article[]
 }
 
 model FavoriteGame {
@@ -48,13 +49,20 @@ model Game {
   releaseDate  String?
   price        String?     @default("0")
   cover        String?
-  genre        String?
   pic          Picture[]
   description  String?
   reviews      Review[]
   mark         Int?        @default(0)
   collection   Collection? @relation(fields: [collectionId], references: [id])
   collectionId Int?
+  genre        Genre?      @relation(fields: [genreId], references: [id])
+  genreId      Int?
+}
+
+model Genre {
+  id    Int     @id @default(autoincrement())
+  name  String?
+  games Game[]
 }
 
 model Review {
@@ -74,4 +82,20 @@ model Collection {
   name        String?
   description String?
   games       Game[]
+}
+
+model Tag {
+  id       Int       @id @default(autoincrement())
+  name     String?
+  articles Article[]
+}
+
+model Article {
+  id     Int     @id @default(autoincrement())
+  title  String?
+  text   String?
+  tag    Tag?    @relation(fields: [tagId], references: [id])
+  tagId  Int?
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }

@@ -25,17 +25,25 @@ class GameController {
         }
         console.log("Папка создана");
       });
+
+      const genre = await prisma.genre.findUnique({
+        where: {
+          name: genre
+        }
+      })
+
       const game = await prisma.game.create({
         data: {
           name: name,
           developer: developer,
           releaseDate: releaseDate,
           price: price,
-          genre: genre,
+          genreId: genre.id,
           description: description,
           cover: `http://92.53.105.185:5000/${name.replaceAll(' ', '')}/${fileName}`,
         },
       });
+
       cover.mv(path.resolve(__dirname, "..", `games/${game.name.replaceAll(' ', '')}`, fileName));
       for (let item in pic) {
         if (item == "cover") {
@@ -54,14 +62,6 @@ class GameController {
           });
         }
       }
-      // for (let i = 0; i < platforms.length; i++) {
-      //   await prisma.platform.create({
-      //     data: {
-      //       gameId: game.id,
-      //       name: platforms[i]["name"],
-      //     },
-      //   });
-      // }
       res.send({ message: "success" });
     }
   }
