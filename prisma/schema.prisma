@@ -23,6 +23,7 @@ model User {
   role          String?        @default("user")
   createdAt     DateTime       @default(now())
   avatar        String?
+  reviewCount   Int?           @default(0)
   favoriteGames FavoriteGame[]
   Review        Review[]
   articles      Article[]

@@ -21,8 +21,8 @@ const calculateRating = async (gameId) => {
       id: gameId,
     },
     data: {
-        mark: rating,
-    }
+      mark: rating,
+    },
   });
 };
 
@@ -32,8 +32,8 @@ class ReviewController {
     const isExist = await prisma.review.findFirst({
       where: {
         userId: userId,
-        gameId: gameId
-      }
+        gameId: gameId,
+      },
     });
     if (isExist) {
       res.json({ message: "Вы уже поставили оценку этой игре" });
@@ -48,32 +48,53 @@ class ReviewController {
         },
       });
 
+      const user = await prisma.user.findFirst({
+        where: {
+          id: userId,
+        },
+      });
+
+      const count = user.reviewCount + 1;
+      let level = user.level;
+
+      if (count % 5 == 0) {
+        level+=1;
+        const user = await prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data:{
+            reviewCount: count,
+            level: user.level
+          }
+        });
+      }
+
       calculateRating(gameId);
 
       res.json({
-        "status": 200,
-        "message":"Отзыв добавлен"
+        status: 200,
+        message: "Отзыв добавлен",
       });
     }
   }
 
-  async check (req, res) {
-    const {id} = req.body;
+  async check(req, res) {
+    const { id, gameId } = req.body;
 
     const review = await prisma.review.findFirst({
       where: {
-        userId: id
-      }
-    })
+        userId: id,
+        id: gameId,
+      },
+    });
 
-    if(review){
-      res.send({message: "true"})
-    } else{
-      res.send({message: "false"})
+    if (review) {
+      res.send({ message: "true" });
+    } else {
+      res.send({ message: "false" });
     }
-
   }
-
 }
 
 module.exports = new ReviewController();

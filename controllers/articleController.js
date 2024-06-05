@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 class articleController {
   async create(req, res) {
     const { title, text, tagName, userId } = req.body;
-    const tag = await prisma.tag.findUnique({
+    const tag = await prisma.tag.findFirst({
       where: {
         name: tagName,
       },
@@ -14,7 +14,7 @@ class articleController {
         title: title,
         text: text,
         tagId: tag.id,
-        userId: userId
+        userId: userId,
       },
     });
     res.json({
@@ -25,6 +25,17 @@ class articleController {
 
   async getAll(req, res) {
     const articles = await prisma.article.findMany();
+
+    res.json(articles);
+  }
+
+  async get(req, res) {
+    const { userId } = req.body;
+    const articles = await prisma.article.findMany({
+      where: {
+        userId: userId,
+      },
+    });
 
     res.json(articles);
   }

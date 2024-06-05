@@ -116,6 +116,16 @@ class UserController {
     });
     res.json(user);
   }
+
+  async getUsers(req, res) {
+    const users = await prisma.user.findMany({
+      orderBy: {
+        reviewCount: 'desc'
+      }
+    });
+    res.json(users);
+  }
+
 }
 
 module.exports = new UserController();

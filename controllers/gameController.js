@@ -19,18 +19,21 @@ class GameController {
       res.json({ message: "Игра с таким именем уже существует" });
     } else {
       let fileName = uuid.v4() + "." + cover.name.split(".").reverse()[0];
-      fs.mkdir(path.join(__dirname, "..", `games/${name.replaceAll(' ', '')}`), (err) => {
-        if (err) {
-          return console.error(err);
+      fs.mkdir(
+        path.join(__dirname, "..", `games/${name.replaceAll(" ", "")}`),
+        (err) => {
+          if (err) {
+            return console.error(err);
+          }
+          console.log("Папка создана");
         }
-        console.log("Папка создана");
-      });
+      );
 
       const genre = await prisma.genre.findFirst({
         where: {
-          name: genreName
-        }
-      })
+          name: genreName,
+        },
+      });
 
       const game = await prisma.game.create({
         data: {
@@ -40,11 +43,21 @@ class GameController {
           price: price,
           genreId: genre.id,
           description: description,
-          cover: `http://92.53.105.185:5000/${name.replaceAll(' ', '')}/${fileName}`,
+          cover: `http://92.53.105.185:5000/${name.replaceAll(
+            " ",
+            ""
+          )}/${fileName}`,
         },
       });
 
-      cover.mv(path.resolve(__dirname, "..", `games/${game.name.replaceAll(' ', '')}`, fileName));
+      cover.mv(
+        path.resolve(
+          __dirname,
+          "..",
+          `games/${game.name.replaceAll(" ", "")}`,
+          fileName
+        )
+      );
       for (let item in pic) {
         if (item == "cover") {
           break;
@@ -52,12 +65,20 @@ class GameController {
           fileName =
             uuid.v4() + "." + pic[`${item}`].name.split(".").reverse()[0];
           pic[`${item}`].mv(
-            path.resolve(__dirname, "..", `games/${game.name.replaceAll(' ', '')}`, fileName)
+            path.resolve(
+              __dirname,
+              "..",
+              `games/${game.name.replaceAll(" ", "")}`,
+              fileName
+            )
           );
           await prisma.picture.create({
             data: {
               gameId: game.id,
-              src: `http://92.53.105.185:5000/${game.name.replaceAll(' ', '')}/${fileName}`,
+              src: `http://92.53.105.185:5000/${game.name.replaceAll(
+                " ",
+                ""
+              )}/${fileName}`,
             },
           });
         }
@@ -77,23 +98,46 @@ class GameController {
 
     const reviews = await prisma.review.findMany({
       where: {
-        gameId: id
-      }
-    })
+        gameId: id,
+      },
+    });
 
     const images = await prisma.picture.findMany({
       where: {
-        gameId: id
-      }
-    })
+        gameId: id,
+      },
+    });
 
-    res.json({game: game, reviews: reviews, images: images});
+    const genre = await prisma.genre.findFirst({
+      where: {
+        id: game.genreId,
+      },
+    });
+
+    res.json({ game: game, reviews: reviews, images: images, genre: genre });
   }
 
-  async getAll(req, res){
-    const games = await prisma.game.findMany();
+  async getNew(req, res) {
+    let now = new Date();
+    const games = await prisma.game.findMany({
+      where: {
+        releaseDate: { contains: now.getFullYear().toString() },
+      },
+      orderBy: {
+        releaseDate: "desc",
+      },
+    });
+    res.json(games);
+  }
 
-    res.json(games)
+  async getAll(req, res) {
+    const games = await prisma.game.findMany({
+      orderBy: {
+        mark: "desc",
+      },
+    });
+
+    res.json(games);
   }
 }
 
