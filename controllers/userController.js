@@ -24,7 +24,6 @@ class UserController {
         message: "Пользователь с таким E-mail уже существует",
       });
     } else {
-
       let fileName = uuid.v4() + "." + avatar.name.split(".").reverse()[0];
       fs.mkdir(path.join(__dirname, "..", `games/avatars/`), (err) => {
         if (err) {
@@ -45,9 +44,9 @@ class UserController {
       });
 
       avatar.mv(path.resolve(__dirname, "..", `games/avatars`, fileName));
-      const favgames = favoriteGames.split(',');
+      const favgames = favoriteGames.split(",");
       for (let i = 0; i < favgames.length; i++) {
-        console.log(favgames[i])
+        console.log(favgames[i]);
         await prisma.favoriteGame.create({
           data: {
             userId: user.id,
@@ -96,7 +95,7 @@ class UserController {
         where: { id: claims.id },
       });
 
-      res.send({user, token});
+      res.send({ user, token });
     } catch (e) {
       return res.status(401).send({ message: "Неавторизирован" });
     }
@@ -120,12 +119,21 @@ class UserController {
   async getUsers(req, res) {
     const users = await prisma.user.findMany({
       orderBy: {
-        reviewCount: 'desc'
-      }
+        reviewCount: "desc",
+      },
     });
     res.json(users);
   }
 
+  async getFav(req, res) {
+    const { userId } = req.body;
+    const favGames = await prisma.favoriteGame.findMany({
+      where: {
+        userId: userId,
+      },
+    });
+    res.json(favGames);
+  }
 }
 
 module.exports = new UserController();

@@ -85,7 +85,7 @@ class ReviewController {
     const review = await prisma.review.findFirst({
       where: {
         userId: id,
-        id: gameId,
+        gameId: gameId,
       },
     });
 
