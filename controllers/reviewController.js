@@ -55,26 +55,27 @@ class ReviewController {
       });
 
       const count = user.reviewCount + 1;
-      let level = user.level;
-
-      if (count % 5 == 0) {
-        level+=1;
-        const user = await prisma.user.update({
-          where: {
-            id: user.id,
-          },
-          data:{
-            reviewCount: count,
-            level: user.level
-          }
-        });
+      let level;
+      if (count >= 5) {
+        level = Math.floor(count / 5)+1;
+      } else{
+        level = 1;
       }
+      const update = await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          reviewCount: count,
+          level: level,
+        },
+      });
 
       calculateRating(gameId);
 
       res.json({
         status: 200,
-        message: "Отзыв добавлен",
+        message: update,
       });
     }
   }

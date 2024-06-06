@@ -139,6 +139,16 @@ class GameController {
 
     res.json(games);
   }
+
+  async search(req, res) {
+    const { query } = req.body;
+    const games = await prisma.game.findMany({
+      where: {
+        name: { contains: query, mode: "insensitive" },
+      },
+    });
+    res.json(games);
+  }
 }
 
 module.exports = new GameController();
